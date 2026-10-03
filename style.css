@@ -306,3 +306,8 @@ input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--teal-2); }
 .badge.link { background: rgba(120, 90, 30, .92); border-color: var(--gold-2); color: #fff; cursor: pointer; }
 .note.en .terms { margin-top: 4px; font-size: .85rem; color: var(--muted); }
 .note.en .terms:first-child { margin-top: 0; }
+.mons { margin-top: 10px; }
+.mons summary { cursor: pointer; }
+.monlist { columns: 2; column-gap: 18px; margin: 6px 0 0; padding-left: 1.1em; font-size: .95rem; }
+.monlist li { break-inside: avoid; }
+@media (max-width: 380px) { .monlist { columns: 1; } }

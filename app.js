@@ -847,9 +847,22 @@
       <img class="sheet-img" src="img/s/${sc.sheet}a.webp" alt="Anverso"><img class="sheet-img" src="img/s/${sc.sheet}b.webp" alt="Reverso"></div>`);
   }
 
+  function monstersHTML(sc) {
+    const M = (window.AH_MONSTERS || {})[sc.id]; if (!M) return '';
+    const en = nbLang() === 'en';
+    const nm = (m) => (en ? m.en : m.es);
+    const key = (m) => nm(m).replace(/^[^\p{L}]+/u, '').toLowerCase();
+    const list = (arr) => [...arr].sort((x, y) => key(x).localeCompare(key(y), 'es')).map((m) => `<li>${esc(nm(m))}${m.q > 1 ? ` <b>×${m.q}</b>` : ''}</li>`).join('');
+    const tot = (arr) => arr.reduce((t, m) => t + m.q, 0);
+    return `<details class="panel mons" open><summary><b>Monstruos</b> <span class="muted">(${tot(M.deck)} cartas${M.aside.length ? ` + ${tot(M.aside)} apartadas` : ''})</span></summary>
+      <ul class="monlist">${list(M.deck)}</ul>
+      ${M.aside.length ? `<div class="muted" style="margin-top:6px">Apartados al inicio:</div><ul class="monlist">${list(M.aside)}</ul>` : ''}
+      <div class="muted" style="font-size:.8rem;margin-top:4px">Incluye los que se colocan en el tablero al empezar.</div></details>`;
+  }
   function showSetupSummary(sc, clues, doom) {
     let h = `<div class="mbox"><div class="mhead"><h3>Preparación · ${esc(sc.name)}</h3><button class="iconbtn" data-x>✕</button></div>
-      <div class="panel"><ul style="margin:0;padding-left:1.1em">${sc.notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul></div>`;
+      <div class="panel"><ul style="margin:0;padding-left:1.1em">${sc.notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul></div>
+      ${monstersHTML(sc)}`;
     if (clues) {
       h += `<div class="note"><b>Pistas iniciales:</b> ${clues.filter(Boolean).map((c) => esc(c.nb || '¿?')).join(', ')}. Coloca una ficha de Pista en cada uno de esos Barrios (los Eventos ya están mezclados en sus mazos).</div>`;
     }
@@ -916,6 +929,7 @@
         const cur = lsGet(LS_CUR, null);
         openModal(`<div class="mbox"><div class="mhead"><h3>${esc(sc.name)}</h3><button class="iconbtn" data-x>✕</button></div>
           <div class="panel" style="margin-bottom:10px"><b>Mazos de encuentro:</b> ${sc.nbs.map(esc).join(' · ')}${sc.aside ? `<br><span class="muted">Apartados: ${sc.aside.map(esc).join(' · ')}</span>` : ''}</div>
+          ${monstersHTML(sc).replace('<details class="panel mons" open>', '<details class="panel mons" style="margin-bottom:10px">')}
           <img class="sheet-img" src="img/s/${sc.sheet}b.webp" alt="">
           ${cur ? '<div class="note warn">Empezar reemplaza la partida en curso (guárdala antes con nombre si la quieres conservar).</div>' : ''}
           <div class="actions"><button class="btn" data-x>Cancelar</button><button class="btn primary" data-go>Preparar partida</button></div></div>`,
