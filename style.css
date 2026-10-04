@@ -81,10 +81,19 @@ img { max-width: 100%; display: block; }
 .pane { display: none; }
 .pane.on { display: block; }
 @media (min-width: 980px) {
-  .tabs { display: none; }
-  .cols { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(340px, 1fr); gap: 22px; align-items: start; }
-  .pane { display: block; }
+  body.layout-cols .tabs { display: none; }
+  body.layout-cols .pane { display: block; }
+  body.layout-cols .cols { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(340px, 1fr); gap: 22px; align-items: start; }
 }
+/* Una columna con pestañas: espacio inestable y Códice más grandes */
+body:not(.layout-cols) .main { max-width: 1100px; }
+body:not(.layout-cols) .evstrip { grid-template-columns: 1fr 1.35fr 1fr; gap: 16px; padding: 14px; }
+body:not(.layout-cols) .evslot .cardmini { max-width: 190px; }
+body:not(.layout-cols) .evslot:nth-child(2) .cardmini { max-width: 280px; }
+body:not(.layout-cols) .evslot:nth-child(2) .nm { font-family: var(--display); font-size: 1.15rem; color: var(--gold-2); }
+body:not(.layout-cols) .evslot .nm { font-size: .98rem; }
+body:not(.layout-cols) .codex { grid-template-columns: repeat(auto-fill, minmax(min(46%, 230px), 1fr)); gap: 12px; }
+@media (max-width: 560px) { body:not(.layout-cols) .evslot:nth-child(2) .cardmini { max-width: 100%; } }
 
 h2.sec {
   font-family: var(--display); font-weight: 400; font-size: 1.15rem; color: var(--gold-2);

@@ -6,12 +6,17 @@
   for (const c of window.AH_CARDS) CARDS[c.id] = c;
   const SCEN = window.AH_SCENARIOS;
   const LS_LANG = 'ahm.lang';
+  const LS_LAYOUT = 'ahm.layout';
+  const isCols = () => lsGet(LS_LAYOUT, 'tabs') === 'cols';
+  const applyLayout = () => document.body.classList.toggle('layout-cols', isCols());
   const LS_CUR = 'ahm.current', LS_SAVES = 'ahm.saves', LS_HIST = 'ahm.hist';
   const HIST_MAX = 150;
 
   const ICON = {
     undo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>',
     menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>',
+    cols: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="2" y="5" width="11" height="14" rx="1"/><rect x="15" y="5" width="7" height="14" rx="1"/></svg>',
+    single: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h4M10 6h4M16 6h4"/><rect x="4" y="10" width="16" height="10" rx="1"/></svg>',
     sheet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M9 4v16"/></svg>',
     clue: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5.5 5.5"/></svg>',
     doom: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-3 3-7 4-7 10a7 7 0 0 0 14 0c0-6-4-7-7-10Zm0 17a3 3 0 0 1-3-3c0-2 1.5-3 3-5 1.5 2 3 3 3 5a3 3 0 0 1-3 3Z"/></svg>',
@@ -237,6 +242,7 @@
       <header class="top">
         <span class="sign sm"><img src="img/logo.svg" alt="Arkham Horror"></span>
         <div class="title"><b>${esc(sc.name)}</b><small>${esc(sc.box)} · ${S.log.length} acciones</small></div>
+        <button class="iconbtn" data-a="layout" title="${isCols() ? 'Una columna con pestañas' : 'Dos columnas'}">${isCols() ? ICON.single : ICON.cols}</button>
         <button class="iconbtn" data-a="sheet" title="Hoja de escenario">${ICON.sheet}</button>
         <button class="iconbtn" data-a="undo" title="Deshacer" ${H.length ? '' : 'disabled'}>${ICON.undo}</button>
         <button class="iconbtn" data-a="menu" title="Menú">${ICON.menu}</button>
@@ -368,6 +374,7 @@
         return;
       }
       const a = t.dataset.a;
+      if (a === 'layout') { lsSet(LS_LAYOUT, isCols() ? 'tabs' : 'cols'); applyLayout(); render(); return; }
       if (a === 'undo') undo();
       else if (a === 'menu') mainMenu();
       else if (a === 'sheet') sheetModal();
@@ -1009,5 +1016,6 @@
   // Atajo: index.html#nuevo=<id de escenario> prepara directamente una partida.
   const hm = location.hash.match(/^#nuevo=([\w-]+)/);
   const hsc = hm && SCEN.find((x) => x.id === hm[1]);
+  applyLayout();
   if (hsc) { history.replaceState(null, '', location.pathname); newGame(hsc); } else render();
 })();
