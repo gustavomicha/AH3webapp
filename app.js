@@ -209,7 +209,7 @@
     const id = ev.cards.pop();
     ev.disc.push(id);
     log(`La Perdición se propaga: ${cardLabel(id)} (fondo del mazo de Eventos → descarte).`);
-    if (!silent) openCard(id, { info: `La Perdición se propaga en <b>${esc(CARDS[id].nb || '¿?')}</b>: coloca 1 Perdición en cada espacio marcado con el icono de Perdición (toca la carta para ver el dorso). Esta carta queda en el descarte y marca el espacio inestable.`, readonly: true });
+    if (!silent) openCard(id, { info: `La Perdición se propaga en <b>${esc(spText(id) || '¿?')}</b> (${esc(CARDS[id].nb || '¿?')}): coloca 1 Perdición por cada icono de Perdición. Esta carta queda en el descarte y marca el espacio inestable.`, readonly: true });
     return id;
   }
   function gateBurst() {
@@ -225,6 +225,11 @@
     const d = deck('HL');
     if (!d.cards.length) { log('No quedan Titulares: coloca 1 Perdición en la hoja de Escenario.'); alertModal('Sin Titulares', 'No quedan cartas de Titular: coloca <b>1 ficha de Perdición sobre la hoja de Escenario</b>.'); return; }
     const id = draw('HL'); openCard(id, { fresh: true });
+  }
+  // Localización(es) con icono de Perdición de una carta de Evento, en el idioma elegido.
+  function spText(id) {
+    const sp = CARDS[id]?.sp || []; const en = nbLang() === 'en';
+    return sp.map(([es, eng, k]) => `${en ? eng : es}${k > 1 ? ` (×${k})` : ''}`).join(' y ');
   }
   function unstableNb() { const ev = deck('EV'); const id = ev.disc[ev.disc.length - 1]; return id ? CARDS[id].nb : null; }
   function spreadTerror(nbName) {
@@ -287,7 +292,7 @@
           <div class="nm">${topId != null ? esc(CARDS[topId].nb || '¿?') : '—'}</div><div class="ct">${ev.cards.length} cartas</div></div>
         <div class="evslot"><div class="lbl">Espacio inestable</div>
           ${discId != null ? `<div class="cardmini" style="background-image:url(${face(discId)});background-position:center top" data-open="${discId}"></div>` : '<div class="cardmini empty">espacio de inicio</div>'}
-          <div class="nm">${unst ? esc(unst) : 'Espacio de inicio'}</div><div class="ct">${ev.disc.length} descartadas</div></div>
+          <div class="nm">${unst ? esc(spText(discId) || unst) : 'Espacio de inicio'}</div>${unst && spText(discId) ? `<div class="ct">${esc(unst)}</div>` : ''}<div class="ct">${ev.disc.length} descartadas</div></div>
         <div class="evslot"><div class="lbl">Pistas en juego</div>
           <div class="cardmini empty" style="font-size:2rem;color:var(--clue-2);font-family:var(--display)">${encIds().reduce((a, id) => a + deck(id).cards.filter((x) => CARDS[x].k === 'ev').length, 0)}</div>
           <div class="nm">Eventos en mazos de barrio</div><div class="ct"><button class="chip" data-a="evmenu">Opciones</button></div></div>
@@ -881,7 +886,7 @@
       h += `<div class="note"><b>Pistas iniciales:</b> ${clues.filter(Boolean).map((c) => esc(c.nb || '¿?')).join(', ')}. Coloca una ficha de Pista en cada uno de esos Barrios (los Eventos ya están mezclados en sus mazos).</div>`;
     }
     if (doom != null) {
-      h += `<div class="note warn"><b>La Perdición se propaga una vez en ${esc(CARDS[doom].nb || '¿?')}:</b> coloca 1 Perdición en el espacio marcado con el icono de Perdición (además de la Perdición inicial de la hoja de Escenario).</div>
+      h += `<div class="note warn"><b>La Perdición se propaga una vez: ${esc(spText(doom) || '¿?')}</b> (${esc(CARDS[doom].nb || '¿?')}). Coloca 1 Perdición por cada icono de Perdición (además de la Perdición inicial de la hoja de Escenario).</div>
         <div class="pair"><img src="${back(doom)}" alt="Dorso"><img src="${face(doom)}" alt="Frente"></div>`;
     }
     h += `<div class="actions"><button class="btn" data-k="sheet">Ver hoja de escenario</button><button class="btn primary" data-x>Empezar</button></div></div>`;
