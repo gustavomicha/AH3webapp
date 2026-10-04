@@ -318,3 +318,6 @@ input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--teal-2); }
 .monlist { columns: 2; column-gap: 18px; margin: 6px 0 0; padding-left: 1.1em; font-size: .95rem; }
 .monlist li { break-inside: avoid; }
 @media (max-width: 380px) { .monlist { columns: 1; } }
+/* Zoom del visor de cartas */
+body.zoom #modal .mbox { max-width: min(1100px, 100%); }
+body.zoom .viewer .flip { width: min(100%, 1000px); }

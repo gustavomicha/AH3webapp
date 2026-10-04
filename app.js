@@ -7,6 +7,9 @@
   const SCEN = window.AH_SCENARIOS;
   const LS_LANG = 'ahm.lang';
   const LS_LAYOUT = 'ahm.layout';
+  const LS_ZOOM = 'ahm.zoom';
+  const isZoom = () => !!lsGet(LS_ZOOM, false);
+  const applyZoom = () => document.body.classList.toggle('zoom', isZoom());
   const isCols = () => lsGet(LS_LAYOUT, 'tabs') === 'cols';
   const applyLayout = () => document.body.classList.toggle('layout-cols', isCols());
   const LS_CUR = 'ahm.current', LS_SAVES = 'ahm.saves', LS_HIST = 'ahm.hist';
@@ -505,11 +508,15 @@
         <div class="face a"><img src="${face(id)}" alt=""></div>
         <div class="face b">${hasBack ? `<img src="${back(id)}" alt="">` : ''}</div>
       </div></div>
+      <div class="fliphint"><button class="chip" data-zoom>${isZoom() ? '− Achicar' : '🔍 Ampliar'}</button></div>
       ${hasBack ? `<div class="fliphint">Toca la carta para darle la vuelta${c.k === 'ar' ? ' (queda así en el Códice) · <button class="chip" data-rside>Lado al azar</button>' : ''}</div>` : ''}
       <div id="cardacts">${cardActionsHTML(id)}</div>
       <div class="actions">${actions}</div>
       ${opt.fresh && p ? '<p class="muted" style="text-align:center;font-size:.85rem">Cerrar con ✕ cancela el robo: la carta vuelve a su lugar.</p>' : ''}
     </div>`, (e) => {
+      if (e.target.closest('[data-zoom]')) {
+        lsSet(LS_ZOOM, !isZoom()); applyZoom(); e.target.closest('[data-zoom]').textContent = isZoom() ? '− Achicar' : '🔍 Ampliar'; return;
+      }
       if (e.target.closest('[data-rside]')) {
         const b = Math.random() < 0.5; S.flip[id] = b; persist();
         $('#flipper').classList.toggle('back', b); toast(`Lado al azar: ${b ? 'reverso' : 'anverso'}`); const ca = $('#cardacts'); if (ca) ca.innerHTML = cardActionsHTML(id); return;
@@ -1017,5 +1024,6 @@
   const hm = location.hash.match(/^#nuevo=([\w-]+)/);
   const hsc = hm && SCEN.find((x) => x.id === hm[1]);
   applyLayout();
+  applyZoom();
   if (hsc) { history.replaceState(null, '', location.pathname); newGame(hsc); } else render();
 })();
