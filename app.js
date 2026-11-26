@@ -846,6 +846,7 @@
         <button class="btn" data-k="notes">Preparación del escenario</button>
         <button class="btn" data-k="topn">Mezclar «entre las N primeras»: N = ${S.n}</button>
         <button class="btn" data-k="home">Volver al inicio (la partida queda guardada)</button>
+        ${isStandalone() ? '' : '<button class="btn" data-k="install">📲 Instalar como app</button>'}
       </div>${langChips()}</div>`, (e) => {
       const lb = e.target.closest('[data-lang]');
       if (lb) { lsSet(LS_LANG, lb.dataset.lang); closeModal(); render(); return; }
@@ -857,6 +858,7 @@
       else if (k === 'notes') { const sc = SCEN.find((x) => x.id === S.scen); showSetupSummary(sc); }
       else if (k === 'topn') { S.n = S.n >= 4 ? 2 : S.n + 1; persist(); mainMenu(); }
       else if (k === 'home') { closeModal(); ui.screen = 'home'; render(); }
+      else if (k === 'install') { closeModal(); installApp(); }
     });
   }
 
@@ -936,6 +938,7 @@
         <h2 class="sec">Partidas guardadas</h2>
         <div class="saves">${saves.length ? saves.map((s, i) => `<div class="panel save"><div class="info"><b>${esc(s.name)}</b><div class="muted">${s.data.log.length} acciones</div></div><button class="btn" data-load="${i}">Cargar</button><button class="btn" data-del="${i}">✕</button></div>`).join('') : '<p class="muted">Todavía no hay partidas guardadas con nombre.</p>'}
           <div class="row"><button class="btn" data-k="import">Importar partida (.json)</button></div></div>
+        ${isStandalone() ? '' : '<div class="row" style="margin-top:14px"><button class="btn" data-k="install">📲 Instalar como app</button></div>'}
       </main>`;
   }
   function bindHome() {
@@ -955,6 +958,7 @@
           (e2) => { if (e2.target.closest('[data-go]')) { closeModal(); newGame(sc); } });
       } else if (t.dataset.k === 'continue') { S = lsGet(LS_CUR, null); H = lsGet(LS_HIST, []); ui.screen = 'game'; render(); }
       else if (t.dataset.k === 'import') $('#importFile').click();
+      else if (t.dataset.k === 'install') installApp();
       else if (t.dataset.load) { const s = lsGet(LS_SAVES, [])[+t.dataset.load]; S = s.data; H = []; ui.screen = 'game'; persist(); render(); }
       else if (t.dataset.del) { const saves = lsGet(LS_SAVES, []); const s = saves[+t.dataset.del]; confirmModal('¿Borrar partida guardada?', esc(s.name), () => { saves.splice(+t.dataset.del, 1); lsSet(LS_SAVES, saves); render(); }, 'Borrar'); }
     };
@@ -1020,6 +1024,25 @@
   function toast(html, img) {
     const t = $('#toast'); t.innerHTML = `${img ? `<img src="${img}" alt="">` : ''}<span>${html}</span>`; t.hidden = false;
     clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3200);
+  }
+
+  // ---------- instalar como app ----------
+  let installEvt = null;
+  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvt = e; });
+  window.addEventListener('appinstalled', () => { installEvt = null; if (ui.screen === 'home') render(); });
+  const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  function installApp() {
+    if (installEvt) { installEvt.prompt(); installEvt.userChoice.finally(() => { installEvt = null; }); return; }
+    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const steps = ios
+      ? '<ol><li>Abrí esta página en <b>Safari</b>.</li><li>Tocá el botón <b>Compartir</b> (el cuadrado con la flecha).</li><li>Elegí <b>«Agregar a inicio»</b>.</li></ol>'
+      : '<ol><li>Abrí esta página en <b>Chrome</b>.</li><li>Tocá el menú <b>⋮</b>.</li><li>Elegí <b>«Instalar app»</b> (o «Agregar a la pantalla principal»).</li></ol>';
+    openModal(`<div class="mbox"><div class="mhead"><h3>Instalar como app</h3><button class="iconbtn" data-x>✕</button></div>
+      <div class="panel">${steps}<p class="muted">Queda un ícono en la pantalla de inicio que abre a pantalla completa. La partida guardada es la misma.</p></div>
+      <div class="actions"><button class="btn primary full" data-x>Entendido</button></div></div>`);
+  }
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
   }
 
   // arranque
